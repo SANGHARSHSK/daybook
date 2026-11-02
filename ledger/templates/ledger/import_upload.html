@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Import statement{% endblock %}
+{% block content %}
+<section class="page-heading"><div class="kicker">A QUICK START</div><h1>Bring your numbers in.</h1><p class="lede">Upload a bank CSV. We’ll check every row before anything is added.</p></section>
+<div class="import-layout">
+  <section class="panel import-card"><div class="step-label"><span class="step-number">01</span><span>SELECT A FILE</span></div><h2>Choose your statement</h2><p class="form-intro">Your file is parsed for this import and never kept as an uploaded document.</p>
+    <form method="post" enctype="multipart/form-data" class="stack-form">{% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      <label class="upload-zone" for="id_file"><span class="upload-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L8 8m4-4 4 4M5 14v4a2 2 0 002 2h10a2 2 0 002-2v-4"/></svg></span><span class="upload-title">Drop a CSV here or <u>browse</u></span><span class="upload-meta">CSV format · max 8 MB</span><input id="id_file" name="file" type="file" accept=".csv,text/csv" required></label>
+      {% if form.file.errors %}<div class="field-error">{{ form.file.errors }}</div>{% endif %}
+      <button class="button button-dark button-wide" type="submit">Review transactions <span>→</span></button>
+    </form>
+    <div class="privacy-inline"><span class="privacy-dot"></span>Only you can view your financial records.</div>
+  </section>
+  <aside class="import-aside"><div class="kicker">WHAT WE CAN READ</div><h3>Most bank exports work out of the box.</h3><p>We look for date, description, and amount columns. Type, category, and account help complete the picture but can be left out.</p><div class="column-list"><div><span class="column-check">✓</span><span><b>Date</b><small>e.g. 01/15/2025 or 2025-01-15</small></span><span class="required-tag">REQUIRED</span></div><div><span class="column-check">✓</span><span><b>Description</b><small>Merchant or transaction details</small></span><span class="required-tag">REQUIRED</span></div><div><span class="column-check">✓</span><span><b>Amount</b><small>Negative values count as expenses</small></span><span class="required-tag">REQUIRED</span></div><div><span class="column-check optional-check">＋</span><span><b>Type · Category · Account</b><small>Optional context for your ledger</small></span><span class="optional-tag">OPTIONAL</span></div></div><div class="tip-note"><span>NOTE</span>Repeated uploads are checked for duplicate transactions before saving.</div></aside>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load ledger_format %}
+{% block title %}Transactions{% endblock %}
+{% block content %}
+<section class="page-heading heading-row"><div><div class="kicker">THE DETAIL BEHIND THE TOTALS</div><h1>Transactions</h1><p class="lede">{{ result_count }} entr{{ result_count|pluralize:"y,ies" }} in this view.</p></div><div class="heading-actions"><a class="button button-light" href="{% url 'export_transactions' %}">↓ <span>Export CSV</span></a><a class="button button-dark" href="{% url 'import_upload' %}"><span class="button-plus">＋</span> Import</a></div></section>
+<form method="get" class="filter-bar">
+  <label class="search-field"><span class="sr-only">Search descriptions</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input name="q" value="{{ query }}" placeholder="Find a merchant or note"></label>
+  <label class="select-field"><span class="sr-only">Type</span><select name="flow"><option value="">All activity</option><option value="expense" {% if flow_filter == 'expense' %}selected{% endif %}>Expenses</option><option value="income" {% if flow_filter == 'income' %}selected{% endif %}>Income</option><option value="transfer" {% if flow_filter == 'transfer' %}selected{% endif %}>Transfers</option></select></label>
+  <label class="select-field"><span class="sr-only">Category</span><select name="category"><option value="">Every category</option>{% for value in categories %}<option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select></label>
+  <label class="month-field"><span class="sr-only">Month</span><input type="month" name="month" value="{{ month_filter }}"></label>
+  <button class="filter-submit" type="submit">Filter <span>→</span></button>
+</form>
+<section class="panel transaction-page-panel">
+  {% if page.object_list %}<div class="table-wrap"><table class="data-table"><thead><tr><th>DESCRIPTION</th><th>DATE</th><th>CATEGORY</th><th>ACCOUNT</th><th class="align-right">AMOUNT</th></tr></thead><tbody>{% for item in page.object_list %}<tr><td><span class="transaction-dot {% if item.flow == 'income' %}dot-income{% elif item.flow == 'transfer' %}dot-transfer{% endif %}"></span><span class="transaction-description">{{ item.description }}</span></td><td class="muted-cell">{{ item.transaction_date|date:"j M Y" }}</td><td><span class="category-pill">{{ item.category }}</span></td><td class="muted-cell">{{ item.account|default:"—" }}</td><td class="align-right amount-cell {% if item.flow == 'income' %}income-cell{% elif item.flow == 'transfer' %}transfer-cell{% endif %}">{% if item.flow == 'income' %}+{% elif item.flow == 'transfer' %}↔{% else %}−{% endif %}₹{{ item.amount|money }}</td></tr>{% endfor %}</tbody></table></div>
+  <div class="pagination"><span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span><div>{% if page.has_previous %}<a href="?q={{ query|urlencode }}&flow={{ flow_filter|urlencode }}&category={{ category_filter|urlencode }}&month={{ month_filter|urlencode }}&page={{ page.previous_page_number }}">← Newer</a>{% endif %}{% if page.has_next %}<a href="?q={{ query|urlencode }}&flow={{ flow_filter|urlencode }}&category={{ category_filter|urlencode }}&month={{ month_filter|urlencode }}&page={{ page.next_page_number }}">Older →</a>{% endif %}</div></div>
+  {% else %}<div class="empty-state"><div class="empty-icon">⌕</div><h2>No transactions found.</h2><p>Try another filter, or bring in a CSV statement to get started.</p><a class="button button-dark" href="{% url 'import_upload' %}">Import transactions</a></div>{% endif %}
+</section>
+{% endblock %}

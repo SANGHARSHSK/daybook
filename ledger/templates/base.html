@@ -1,0 +1,56 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ed">
+  <title>{% block title %}Daybook{% endblock %} · Daybook</title>
+  <link rel="stylesheet" href="{% static 'ledger/app.css' %}">
+  <script src="{% static 'ledger/app.js' %}" defer></script>
+</head>
+<body>
+  {% if user.is_authenticated %}
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="{% url 'dashboard' %}" aria-label="Daybook home">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span class="brand-name">daybook<span class="brand-period">.</span></span>
+      </a>
+      <div class="side-caption">YOUR MONEY, IN CONTEXT</div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}is-active{% endif %}">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="2.5" width="6" height="6" rx="1"/><rect x="11.5" y="2.5" width="6" height="6" rx="1"/><rect x="2.5" y="11.5" width="6" height="6" rx="1"/><rect x="11.5" y="11.5" width="6" height="6" rx="1"/></svg>Overview
+        </a>
+        <a href="{% url 'transactions' %}" class="nav-link {% if request.resolver_match.url_name == 'transactions' %}is-active{% endif %}">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/><circle cx="5" cy="5" r=".7"/><circle cx="5" cy="10" r=".7"/><circle cx="5" cy="15" r=".7"/></svg>Transactions
+        </a>
+        <a href="{% url 'import_upload' %}" class="nav-link {% if 'import_' in request.resolver_match.url_name %}is-active{% endif %}">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 13V3m0 0L6.5 6.5M10 3l3.5 3.5M3 12.5v3A1.5 1.5 0 004.5 17h11a1.5 1.5 0 001.5-1.5v-3"/></svg>Import statement
+        </a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="privacy-note"><span class="privacy-dot"></span><span>Your ledger is private<br>to your account.</span></div>
+        <div class="profile-row">
+          <span class="avatar">{{ user.username|first|upper }}</span>
+          <span class="profile-name">{{ user.get_short_name|default:user.username }}</span>
+          <form method="post" action="{% url 'logout' %}" class="logout-form">{% csrf_token %}<button class="icon-button" type="submit" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 3H4.5A1.5 1.5 0 003 4.5v11A1.5 1.5 0 004.5 17H8M12 6l4 4-4 4m4-4H7"/></svg></button></form>
+        </div>
+      </div>
+    </aside>
+    <main class="main-area">
+      <header class="topbar"><span class="eyebrow">PERSONAL FINANCE, KEPT SIMPLE</span><div class="topbar-tools"><span class="topbar-date">{% now "l, j F Y" %}</span><form method="post" action="{% url 'logout' %}" class="mobile-logout">{% csrf_token %}<button type="submit">Sign out</button></form></div></header>
+      {% if messages %}<div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+      <div class="page-content">{% block content %}{% endblock %}</div>
+      <footer class="page-footer"><span>DAYBOOK <span class="footer-dot">/</span> A CLEARER VIEW OF YOUR MONEY</span><span>YOUR DATA STAYS YOURS</span></footer>
+    </main>
+  </div>
+  {% else %}
+  <main class="auth-shell">
+    <div class="auth-brand"><a class="brand" href="{% url 'login' %}"><span class="brand-mark"><span></span><span></span><span></span></span><span class="brand-name">daybook<span class="brand-period">.</span></span></a><span class="auth-tag">A clearer view of your money.</span></div>
+    <div class="auth-main">{% if messages %}<div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% block auth_content %}{% endblock %}</div>
+    <div class="auth-foot">A PERSONAL LEDGER, BUILT FOR REAL LIFE.</div>
+  </main>
+  {% endif %}
+</body>
+</html>

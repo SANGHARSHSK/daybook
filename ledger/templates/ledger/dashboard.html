@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load ledger_format %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<section class="page-heading heading-row">
+  <div><div class="kicker">YOUR MONTH, AT A GLANCE</div><h1>Good to see you{% if user.first_name %}, {{ user.first_name }}{% endif %}.</h1><p class="lede">A little clarity goes a long way.</p></div>
+  <a class="button button-dark" href="{% url 'import_upload' %}"><span class="button-plus">＋</span> Add transactions</a>
+</section>
+
+<section class="metric-grid" aria-label="This month's totals">
+  <article class="metric-card metric-primary"><div class="metric-label">SPENT THIS MONTH <span class="metric-mark">↘</span></div><div class="metric-value">₹{{ current_expense|money }}</div><div class="metric-foot">{{ today|date:"F Y" }} <span class="metric-sep">·</span> across your accounts</div><div class="metric-rule"></div></article>
+  <article class="metric-card"><div class="metric-label">MONEY IN <span class="metric-mark mark-green">↗</span></div><div class="metric-value">₹{{ current_income|money }}</div><div class="metric-foot">Income recorded this month</div><div class="metric-rule"></div></article>
+  <article class="metric-card"><div class="metric-label">NEXT MONTH GUIDE <span class="metric-mark">≈</span></div>{% if estimate != None %}<div class="metric-value">₹{{ estimate|money }}</div><div class="metric-foot">Average of the last 3 complete months</div>{% else %}<div class="metric-value metric-muted">—</div><div class="metric-foot">Add 3 complete months to see your run rate</div>{% endif %}<div class="metric-rule"></div></article>
+</section>
+
+<section class="dashboard-grid">
+  <article class="panel trend-panel">
+    <div class="panel-heading"><div><div class="kicker">THE BIG PICTURE</div><h2>Spending over time</h2></div><span class="period-chip">LAST 6 MONTHS</span></div>
+    {% if transaction_count %}
+    <div class="chart" role="img" aria-label="Monthly expense totals for the last six months">
+      <div class="chart-values">{% for item in months %}<div class="chart-col"><span class="chart-amount">₹{{ item.expense|money }}</span><div class="chart-track"><div class="chart-bar {% if forloop.last %}chart-bar-current{% endif %}" style="height: {{ item.bar_height }}%"></div></div><span class="chart-month {% if forloop.last %}chart-month-current{% endif %}">{{ item.label }}</span></div>{% endfor %}</div>
+    </div>
+    <div class="chart-foot"><span><i class="legend-dot"></i> Monthly spending</span><span>Amounts in ₹</span></div>
+    {% else %}
+    <div class="empty-chart"><div class="empty-illustration"><span></span><span></span><span></span><span></span><span></span></div><h3>Your first month starts here.</h3><p>Import a bank CSV to see your spending take shape.</p><a href="{% url 'import_upload' %}" class="text-link">Import transactions <span>→</span></a></div>
+    {% endif %}
+  </article>
+
+  <article class="panel category-panel">
+    <div class="panel-heading"><div><div class="kicker">WHERE IT GOES</div><h2>Top categories</h2></div><span class="panel-period">THIS MONTH</span></div>
+    {% if categories %}<div class="category-list">{% for item in categories %}<div class="category-item"><div class="category-line"><span class="category-title">{{ item.category }}</span><span class="category-amount">₹{{ item.total|money }}</span></div><div class="category-track"><div class="category-fill fill-{{ forloop.counter }}" style="width: {% widthratio item.total current_expense 100 %}%"></div></div></div>{% endfor %}</div><a class="text-link category-more" href="{% url 'transactions' %}">Explore transactions <span>→</span></a>{% else %}<div class="empty-small"><p>Category totals will appear here once you import some spending.</p><a class="text-link" href="{% url 'import_upload' %}">Bring in a statement <span>→</span></a></div>{% endif %}
+  </article>
+</section>
+
+<section class="panel recent-panel">
+  <div class="panel-heading"><div><div class="kicker">THE LATEST</div><h2>Recent transactions</h2></div><a href="{% url 'transactions' %}" class="text-link">All transactions <span>→</span></a></div>
+  {% if recent_transactions %}<div class="table-wrap"><table class="data-table"><thead><tr><th>DESCRIPTION</th><th>DATE</th><th>CATEGORY</th><th class="align-right">AMOUNT</th></tr></thead><tbody>{% for item in recent_transactions %}<tr><td><span class="transaction-dot {% if item.flow == 'income' %}dot-income{% elif item.flow == 'transfer' %}dot-transfer{% endif %}"></span><span class="transaction-description">{{ item.description }}</span></td><td class="muted-cell">{{ item.transaction_date|date:"j M Y" }}</td><td><span class="category-pill">{{ item.category }}</span></td><td class="align-right amount-cell {% if item.flow == 'income' %}income-cell{% elif item.flow == 'transfer' %}transfer-cell{% endif %}">{% if item.flow == 'income' %}+{% elif item.flow == 'transfer' %}↔{% else %}−{% endif %}₹{{ item.amount|money }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-table">Nothing here yet. Your first import will show up right here.</div>{% endif %}
+</section>
+{% endblock %}

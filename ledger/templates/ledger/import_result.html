@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block title %}Import details{% endblock %}
+{% block content %}
+<section class="page-heading"><div class="kicker">IMPORT HISTORY</div><h1>{% if batch.status == 'imported' %}All caught up.{% elif batch.status == 'cancelled' %}Import discarded.{% else %}Import details{% endif %}</h1><p class="lede">{{ batch.filename }}</p></section>
+<section class="panel result-card"><div class="result-icon {% if batch.status == 'imported' %}result-ok{% endif %}">{% if batch.status == 'imported' %}✓{% else %}—{% endif %}</div><h2>{% if batch.status == 'imported' %}Your ledger is up to date.{% else %}No transactions were added.{% endif %}</h2><p>{% if batch.status == 'imported' %}{{ batch.added_rows }} added · {{ batch.duplicate_rows }} duplicate{{ batch.duplicate_rows|pluralize }} skipped · {{ batch.invalid_rows }} invalid row{{ batch.invalid_rows|pluralize }}{% else %}This batch did not change your transactions.{% endif %}</p><div class="result-actions"><a class="button button-dark" href="{% url 'transactions' %}">View transactions <span>→</span></a><a class="button button-light" href="{% url 'import_upload' %}">Import another</a></div></section>
+{% endblock %}
